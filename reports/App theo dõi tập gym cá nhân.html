@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khảo sát app tập gym</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: một cột đọc ~860px, mỗi nhu cầu là một mục có "ai làm tốt" + "bài học cho eCoach"; bảng cuộn ngang riêng trên điện thoại */
+:root {
+  --bg: #F6F7FB;
+  --surface: #FFFFFF;
+  --fg: #141A2E;
+  --muted: #59627E;
+  --line: #DCE1ED;
+  --navy: #1E40AF;
+  --navy-soft: #E7ECFB;
+  --emerald: #059669;
+  --emerald-soft: #E3F5EE;
+  --amber: #B4610A;
+  --amber-soft: #FCF0DF;
+  --font-display: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1220; --surface: #161B2C; --fg: #E6E9F2; --muted: #9AA3BE; --line: #2A3148;
+    --navy: #8AA6FF; --navy-soft: #1C2543; --emerald: #3CCB9E; --emerald-soft: #12302A;
+    --amber: #F2A947; --amber-soft: #33270F; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1220; --surface: #161B2C; --fg: #E6E9F2; --muted: #9AA3BE; --line: #2A3148;
+  --navy: #8AA6FF; --navy-soft: #1C2543; --emerald: #3CCB9E; --emerald-soft: #12302A;
+  --amber: #F2A947; --amber-soft: #33270F; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.65;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+.wrap { max-width: 860px; margin: 0 auto; display: grid; gap: 56px; }
+a { color: var(--navy); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: clamp(1.9rem, 5vw, 2.7rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.muted { color: var(--muted); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+
+/* Header */
+header.top { padding-top: 48px; display: grid; gap: 18px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: .85rem; color: var(--muted); }
+.lede { font-size: 1.12rem; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.toc a {
+  font-size: .85rem; text-decoration: none; color: var(--fg);
+  border: 1px solid var(--line); background: var(--surface); padding: 4px 12px; border-radius: 999px;
+}
+.toc a:hover { border-color: var(--navy); color: var(--navy); }
+
+/* Key takeaways */
+.keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.key {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px 18px; display: grid; gap: 6px; align-content: start;
+}
+.key b { font-size: 1rem; }
+.key p { font-size: .92rem; color: var(--muted); }
+
+section { display: grid; gap: 18px; scroll-margin-top: 16px; }
+section > header { display: grid; gap: 6px; }
+
+/* Lesson callout */
+.lesson {
+  background: var(--emerald-soft); border-radius: 10px; padding: 14px 18px;
+  display: grid; gap: 6px;
+}
+.lesson .eyebrow { color: var(--emerald); }
+.lesson ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.warn { background: var(--amber-soft); }
+.warn .eyebrow { color: var(--amber); }
+
+/* Tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--navy-soft); }
+td.num, th.num { white-space: nowrap; }
+caption { caption-side: bottom; text-align: left; padding: 8px 14px; font-size: .78rem; color: var(--muted); }
+
+/* Figure: set logger mock */
+figure { margin: 0; display: grid; gap: 8px; }
+figcaption { font-size: .8rem; color: var(--muted); }
+.logger {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 14px; display: grid; gap: 6px; max-width: 460px;
+}
+.logger .ex { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.logger .ex b { color: var(--navy); }
+.row {
+  display: grid; grid-template-columns: 2.2rem 1fr 3.6rem 3rem 2.2rem; gap: 8px; align-items: center;
+  font-family: var(--font-data); font-variant-numeric: tabular-nums; font-size: .88rem;
+  padding: 6px 8px; border-radius: 8px;
+}
+.row.head { font-family: var(--font-body); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.row.done { background: var(--emerald-soft); }
+.row .prev { color: var(--muted); }
+.row .cell { background: var(--bg); border-radius: 6px; text-align: center; padding: 2px 0; }
+.row.done .cell { background: transparent; }
+.tick {
+  width: 1.8rem; height: 1.8rem; border-radius: 6px; display: grid; place-items: center;
+  border: 1.5px solid var(--line); color: var(--muted); font-size: .9rem;
+}
+.row.done .tick { background: var(--emerald); border-color: var(--emerald); color: var(--surface); }
+.hint { font-size: .8rem; color: var(--amber); font-family: var(--font-body); padding: 0 8px; }
+
+/* Chart */
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; min-width: 480px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: .8rem; color: var(--muted); padding: 4px 4px 0; }
+.legend span::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+.legend .l-raw { color: var(--muted); }
+.legend .l-trend { color: var(--navy); }
+code { font-family: var(--font-data); font-size: .85em; background: var(--navy-soft); padding: 1px 6px; border-radius: 4px; overflow-wrap: anywhere; }
+
+/* Model chain */
+.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: .88rem; }
+.chain span { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; }
+.chain i { font-style: normal; color: var(--muted); }
+.chain span.new { border-color: var(--navy); color: var(--navy); font-weight: 600; }
+
+/* Two columns free / paid */
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.split > div { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.split ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+.tag.free { background: var(--emerald-soft); color: var(--emerald); }
+.tag.paid { background: var(--navy-soft); color: var(--navy); }
+
+ol.sources { margin: 0; padding-left: 1.4em; display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+ol.sources a { overflow-wrap: anywhere; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">eCoach · Nghiên cứu đối thủ · 16/10/2026</div>
+  <h1>Người tập Việt vẫn phải ghép năm app</h1>
+  <p class="lede">Khảo sát cách các app hiện có phục vụ <strong>người tập gym cá nhân</strong>: ghi tạ, nhiều lịch theo giai đoạn, cân nặng, ảnh tiến trình, lịch ăn món Việt và báo cáo tiến bộ. Mục tiêu là tìm mẫu thiết kế nên học và khoảng trống cho một PWA tiếng Việt dành cho người lười ghi chép.</p>
+  <div class="meta">
+    <span>Đã xem: Hevy, Strong, JEFIT, Boostcamp, Liftosaur, Fitbod, RP, MacroFactor, MyFitnessPal, Cronometer, Happy Scale, Libra, Wao, Eatsy, Caloer</span>
+  </div>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#ket-luan-nhanh">Kết luận nhanh</a>
+    <a href="#ghi-ta">Ghi tạ</a>
+    <a href="#giai-doan">Chương trình & giai đoạn</a>
+    <a href="#can-nang">Cân nặng</a>
+    <a href="#anh">Ảnh tiến trình</a>
+    <a href="#an-uong">Ăn uống món Việt</a>
+    <a href="#bao-cao">Báo cáo tiến bộ</a>
+    <a href="#gia">Giá</a>
+    <a href="#khoang-trong">Khoảng trống</a>
+    <a href="#de-xuat">Đề xuất cho eCoach</a>
+    <a href="#han-che">Hạn chế</a>
+  </nav>
+</header>
+
+<section id="ket-luan-nhanh">
+  <header><div class="eyebrow">Kết luận nhanh</div><h2>Mỗi mảng có app giỏi, nhưng không ai nối chúng lại</h2></header>
+  <div class="keys">
+    <div class="key"><b>Ghi tạ đã có chuẩn</b><p>Hevy và Strong: mỗi hiệp một hàng, cột "lần trước", bấm ✓ là đồng hồ nghỉ chạy. Khoảng 1–2 chạm mỗi hiệp.</p></div>
+    <div class="key"><b>Chưa ai có "giai đoạn"</b><p>Không app nào gộp lịch tập, mục tiêu ăn và mục tiêu cân của một đợt tăng cơ hay siết vào một đối tượng.</p></div>
+    <div class="key"><b>Cân nặng: xem đường xu hướng</b><p>Happy Scale, Libra, MacroFactor lấy trend đã làm mượt làm số chính, nên cân lên xuống mỗi ngày không gây hoang mang.</p></div>
+    <div class="key"><b>Món Việt còn bỏ ngỏ</b><p>Số liệu lệch xa (phở 350 hay 450 kcal), chưa có bảng dinh dưỡng chính thức dạng mở. Chưa app nào có "bữa kế hoạch → chạm xác nhận".</p></div>
+    <div class="key"><b>Không có tiếng Việt</b><p>Hevy và JEFIT không hỗ trợ tiếng Việt. Không tìm thấy app ghi tạ đáng kể nào do người Việt làm.</p></div>
+    <div class="key"><b>Paywall chặn đúng nhu cầu</b><p>Strong cho 3 routine, Hevy 4 routine miễn phí. Người tập 4–5 buổi/tuần bị đẩy sang trả phí ngay.</p></div>
+  </div>
+</section>
+
+<section id="ghi-ta">
+  <header><div class="eyebrow">Nhu cầu 1</div><h2>Ghi tạ: một hàng, một chạm, đồng hồ nghỉ tự chạy</h2></header>
+  <p>Hevy, Strong và JEFIT dùng cùng một mô hình dữ liệu. Buổi tập đã ghi là một <em>bản sao</em> của routine, được phép khác routine gốc. Mỗi hiệp có loại (khởi động / thường / drop / tới hạn) và RPE tùy chọn; superset gom nhiều bài; ghi chú gắn theo bài.</p>
+  <div class="chain" aria-label="Mô hình dữ liệu">
+    <span>Thư mục</span><i>→</i><span>Routine</span><i>→</i><span>Bài tập</span><i>→</i><span>Hiệp</span>
+    <i>·</i><span>Buổi tập đã ghi = bản sao routine</span>
+  </div>
+  <p>Mẫu giao diện nhanh nhất: mỗi hiệp là một hàng <strong>Hiệp | Lần trước | kg | reps | ✓</strong>. Chạm vào "lần trước" để chép số sang buổi hiện tại; chạm ✓ để xác nhận và khởi động đồng hồ nghỉ. Hevy tự lưu khi đổi tạ hay reps, chỉ hỏi "Cập nhật routine / Giữ nguyên" khi <em>cấu trúc</em> thay đổi (thêm/bớt bài, thêm/bớt hiệp, đổi thứ tự).</p>
+
+  <figure>
+    <div class="logger" role="img" aria-label="Minh họa màn hình ghi hiệp tập với số của lần trước được điền sẵn">
+      <div class="ex"><b>Đẩy ngực ngang (Bench press)</b><span class="muted" style="font-size:.8rem">Mục tiêu 4 × 8–12</span></div>
+      <div class="row head"><span>Hiệp</span><span>Lần trước</span><span>kg</span><span>reps</span><span>✓</span></div>
+      <div class="row done"><span>1</span><span class="prev">60 × 12</span><span class="cell">62.5</span><span class="cell">10</span><span class="tick">✓</span></div>
+      <div class="row done"><span>2</span><span class="prev">60 × 11</span><span class="cell">62.5</span><span class="cell">9</span><span class="tick">✓</span></div>
+      <div class="row"><span>3</span><span class="prev">60 × 10</span><span class="cell">62.5</span><span class="cell">9</span><span class="tick">○</span></div>
+      <div class="row"><span>4</span><span class="prev">60 × 9</span><span class="cell">62.5</span><span class="cell">8</span><span class="tick">○</span></div>
+      <div class="hint">Tuần trước hiệp 1 đạt 12 reps (mức trên) → gợi ý +2,5 kg</div>
+    </div>
+    <figcaption>Minh họa (số giả định): mẫu Hevy/Strong, đi thêm một bước là điền sẵn ô nhập để hiệp "giống dự kiến" chỉ cần một chạm ✓.</figcaption>
+  </figure>
+
+  <p>Cả ba đều có PR, 1RM ước tính và biểu đồ theo bài. Strong không gợi ý tăng tạ ("bạn tự quyết"). Hevy bán đúng tính năng này qua <strong>Hevy Trainer</strong> (gói Pro, ra mắt 02/2026): đạt mức trên của dải rep thì tăng tạ. JEFIT phân tích sâu nhất nhưng khóa trong gói Elite.</p>
+  <p>Người dùng khen tốc độ (Hevy và Strong đều 4,9★ trên iOS, mỗi app khoảng 100 nghìn lượt). Lời chê tập trung vào giới hạn: Strong khóa routine, không ghi được buổi trong quá khứ; Hevy có feed mạng xã hội cứng trên trang chủ, bài bodyweight không tính volume; JEFIT giao diện cũ.</p>
+
+  <div class="lesson">
+    <div class="eyebrow">Bài học cho eCoach</div>
+    <ul>
+      <li>Lưu <code>target_reps_min</code> / <code>target_reps_max</code> riêng ở từng hiệp kế hoạch. Tài liệu Hevy/Strong không cho thấy dải rep là trường riêng; Liftosaur thì có (<code>3x8-12</code>).</li>
+      <li>Điền sẵn số lần trước vào ô nhập, không chỉ hiển thị bên cạnh.</li>
+      <li>Trang chủ là "buổi tập hôm nay", không phải feed.</li>
+      <li>Ghi được khi mất sóng là bắt buộc. Không tìm thấy tài liệu chính thức nào về cách các app này xử lý offline.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="giai-doan">
+  <header><div class="eyebrow">Nhu cầu 2</div><h2>Chương trình và giai đoạn: lịch sử đi theo ngày, không theo chương trình</h2></header>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Mô hình</th><th>App</th><th>Cách hoạt động</th></tr></thead>
+      <tbody>
+        <tr><td><b>Danh sách routine phẳng</b></td><td>Hevy, Strong</td><td>"Chương trình" là một thư mục routine. Không có tuần, không có luật tăng tạ; người dùng tự chọn routine mỗi lần tập.</td></tr>
+        <tr><td><b>Chương trình nhiều tuần</b></td><td>Boostcamp, Liftosaur, Alpha Progression, RP</td><td>Chương trình → khối → tuần → ngày → bài → hiệp, kèm luật tăng tạ (tuyến tính, double progression, % max).</td></tr>
+        <tr><td><b>Không có chương trình</b></td><td>Fitbod</td><td>App tự sinh buổi mỗi lần mở, dựa trên % hồi phục từng nhóm cơ.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Điểm chung quan trọng nhất: <strong>lịch sử tập độc lập với chương trình</strong>. Đổi chương trình không mất dữ liệu. Đa số app chạy kiểu <strong>"buổi tiếp theo" xoay vòng</strong>: lỡ một ngày thì thứ tự lùi lại chứ không hỏng chương trình; MacroFactor Workouts có nút bỏ qua (hoàn tác được) và dời buổi.</p>
+  <p>Liftosaur là cực linh hoạt: chương trình viết bằng văn bản, ví dụ <code>Squat / 5x5 / progress: lp(5lb)</code> hay <code>dp(5lb, 8, 12)</code>. Người dùng khen nhưng thừa nhận "khá kỹ thuật", nên Liftosaur phải thêm trình lập kế hoạch trực quan đặt lên trên.</p>
+  <p><strong>Khoảng trống lớn nhất là nối tập với ăn.</strong> MacroFactor có app dinh dưỡng và app tập (ra 01/2026) nhưng chỉ đồng bộ cân nặng, ảnh, số đo, và cố ý không tự điều chỉnh qua lại. RP bán app ăn riêng, app tập riêng.</p>
+  <div class="chain" aria-label="Mô hình đề xuất">
+    <span class="new">Giai đoạn</span><i>=</i><span>khoảng ngày</span><i>+</i><span>mục tiêu tăng/siết/giữ</span><i>+</i><span>lịch tập</span><i>+</i><span>mục tiêu kcal/macro</span><i>+</i><span>mục tiêu cân</span>
+  </div>
+  <div class="lesson">
+    <div class="eyebrow">Bài học cho eCoach</div>
+    <ul>
+      <li>Coi "giai đoạn" là đối tượng chính. Đây là thứ thị trường chưa có.</li>
+      <li>Lịch sử buổi tập lưu theo ngày, không phụ thuộc giai đoạn hay routine.</li>
+      <li>Một con trỏ "buổi kế tiếp"; ngày trong tuần chỉ dùng để nhắc; không bao giờ bắt "bắt đầu lại".</li>
+      <li>Gắn nhãn giai đoạn và vẽ biểu đồ cạnh nhau, không tự giảm volume khi đang siết. MacroFactor đã chủ động tránh tự động hóa phần này.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="can-nang">
+  <header><div class="eyebrow">Nhu cầu 3</div><h2>Cân nặng: ghi số thô, nhưng xem đường xu hướng</h2></header>
+  <p>Công thức gốc của Hacker's Diet: <code>trend[hôm nay] = trend[hôm qua] + 0,1 × (cân hôm nay − trend[hôm qua])</code>. Mỗi lần cân chỉ kéo đường xu hướng đi 10%, nên ăn mặn hay uống nhiều nước một hôm không làm đường này nhảy. MacroFactor thêm nội suy cho ngày không cân và hiện đường thô mờ cạnh đường trend đậm.</p>
+  <figure>
+    <div class="chart">
+      <svg id="weight-chart" viewBox="0 0 640 240" role="img" aria-label="Biểu đồ minh họa cân nặng 28 ngày: điểm cân thô dao động, đường xu hướng giảm đều"></svg>
+      <div class="legend"><span class="l-raw">Cân thô mỗi sáng</span><span class="l-trend">Xu hướng (hệ số 0,1)</span></div>
+    </div>
+    <figcaption>Dữ liệu minh họa 28 ngày đợt siết, không phải số thật. Số cân nhảy ±0,8 kg mỗi ngày, đường xu hướng đi xuống đều.</figcaption>
+  </figure>
+  <p><strong>Happy Scale</strong> đạt 4,9★ từ hơn 58 nghìn lượt nhờ trend, mốc phụ và dự đoán có tên ("cân nặng ngày cưới"). Người dùng nói app giúp họ không hoảng khi cân tăng tạm thời. <strong>Libra</strong> là bản tương đương trên Android. Lứa app mới (Kind Scale, Steady) bỏ streak và nhãn "ngày tốt/xấu", có chế độ ẩn con số: streak và phán xét làm một phần người dùng khó chịu.</p>
+  <div class="lesson warn">
+    <div class="eyebrow">Ràng buộc của PWA</div>
+    <p>Thứ giảm công nhập nhiều nhất là tự lấy số từ cân thông minh qua Apple Health / Health Connect. PWA không đọc được hai nguồn này. eCoach phải bù bằng thao tác cực nhanh: mở app là thấy ô cân, bàn phím số, một chạm lưu.</p>
+  </div>
+</section>
+
+<section id="anh">
+  <header><div class="eyebrow">Nhu cầu 4</div><h2>Ảnh tiến trình: ba tư thế, ảnh mờ lần trước, riêng tư mặc định</h2></header>
+  <p><strong>Hevy</strong> làm bản tối giản: mỗi ngày một ảnh, nút "Overlay" hiện mờ ảnh lần trước để căn tư thế, so sánh cạnh nhau, ảnh luôn riêng tư kể cả khi hồ sơ công khai. Hevy khuyên chụp mỗi 4–5 tuần vì thay đổi hằng tuần quá nhỏ. Giới hạn một ảnh/ngày bị chê vì không chụp đủ trước/nghiêng/sau.</p>
+  <p>Các app chuyên ảnh (Progressly, ProgressCam, Progress Pics) đã thành chuẩn: bộ tư thế trước/nghiêng/sau, ảnh mờ ngay trong khung ngắm, thanh trượt trước/sau, xuất timelapse, lưu trên máy. Ngược lại, app Progress (Lasmit) khóa chính tính năng ảnh sau paywall, và việc khóa tính năng cốt lõi là lời chê lặp lại.</p>
+  <div class="lesson">
+    <div class="eyebrow">Bài học cho eCoach</div>
+    <ul>
+      <li>Một lần chụp = bộ 3 tư thế, gắn với ngày và giá trị trend cân hôm đó.</li>
+      <li>Ảnh mờ lần trước để căn tư thế. Trên PWA dùng chọn ảnh/chụp qua input file.</li>
+      <li>Riêng tư mặc định; lưu mã hóa; nhắc chụp theo chu kỳ 4 tuần thay vì hằng ngày.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="an-uong">
+  <header><div class="eyebrow">Nhu cầu 5</div><h2>Ăn uống kiểu Việt: lặp lại bữa cũ quan trọng hơn quét mã vạch</h2></header>
+  <p>App lớn nào cũng có tìm kiếm, mã vạch, AI chụp ảnh, giọng nói. Nhưng với người ăn lặp lại ("1 chén cơm + ức gà" mỗi ngày), <strong>chép bữa cũ và bữa đã lưu</strong> tiết kiệm công nhất. MacroFactor cho ghi trước, chép sang "Hôm nay / Ngày mai" và dán ra cả tuần. AI chụp ảnh của họ có chế độ "Ảnh + chữ" dành cho món phức tạp hoặc món vùng miền, đúng trường hợp cơm tấm, phở, bún bò.</p>
+  <p>Triết lý của MacroFactor có lợi cho người lười: ghi <em>nhất quán</em> quan trọng hơn ghi <em>chính xác</em>, vì thuật toán hấp thụ sai số đều đặn và điều chỉnh mục tiêu kcal/macro hằng tuần theo lượng ăn và trend cân.</p>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Món</th><th class="num">Mức kcal đã gặp</th><th>Nguồn</th></tr></thead>
+      <tbody>
+        <tr><td>Phở (1 tô)</td><td class="num">350 · 450</td><td>Một bài tổng hợp · bộ dữ liệu cộng đồng vn_food_db</td></tr>
+        <tr><td>Bún bò Huế (1 tô đầy đủ)</td><td class="num">500 – 650+</td><td>Pharmacity</td></tr>
+      </tbody>
+      <caption>Cùng một món, chênh nhau 100–150 kcal tùy nguồn.</caption>
+    </table>
+  </div>
+  <p>App Việt mạnh về số món và tiếng Việt nhưng tín hiệu tin cậy yếu: <strong>Eatsy</strong> khoảng 6.000 món; <strong>Caloer</strong> chỉ 72 lượt đánh giá và có review báo mất dữ liệu; <strong>Wao</strong> tự nhận hơn 1,5 triệu người dùng và "2 triệu món Việt" (gần như chắc đã đếm cả biến thể). Bảng thành phần thực phẩm của Viện Dinh dưỡng có bản in (2000, 2017) nhưng không tìm thấy bản số hóa mở có giấy phép.</p>
+  <div class="lesson">
+    <div class="eyebrow">Bài học cho eCoach</div>
+    <ul>
+      <li><strong>Chưa app nào có "bữa đã lên kế hoạch → chạm xác nhận đã ăn".</strong> Đây là luồng hợp nhất cho người lười: lịch ăn của giai đoạn hiện sẵn, ăn đúng thì chạm, khác thì đổi món hoặc bỏ.</li>
+      <li>Tự biên soạn bảng khẩu phần chuẩn cho 100–300 món Việt phổ biến, ghi rõ "ước tính", không nhận dữ liệu người dùng tự nhập vào bảng chung.</li>
+      <li>Ảnh + chữ bằng AI để dành cho ăn ngoài, làm sau.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="bao-cao">
+  <header><div class="eyebrow">Nhu cầu 6</div><h2>Báo cáo tiến bộ đang bị chia theo từng app</h2></header>
+  <p>App cân nặng báo cáo trend, mốc và ngày dự kiến đạt mục tiêu. MacroFactor có check-in hằng tuần dựa trên trend. App ghi tạ báo PR, volume, biểu đồ theo bài, và Hevy miễn phí chỉ giữ biểu đồ 3 tháng. Wao có báo cáo dinh dưỡng theo ngày/tuần.</p>
+  <p><strong>Không tìm thấy app cá nhân nào tự sinh một thẻ check-in gộp đủ</strong>: trend cân thay đổi bao nhiêu, tốc độ/tuần so với mục tiêu, ngày dự kiến, số ngày đã ghi, số buổi tập, PR mới, ảnh so với 4 tuần trước. Một app gộp tập, ăn và cân có sẵn mọi dữ liệu để làm việc này.</p>
+</section>
+
+<section id="gia">
+  <header><div class="eyebrow">Giá & thu phí (2025–2026)</div><h2>Ba bậc giá, và paywall khóa đúng chỗ "nhiều lịch"</h2></header>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>App</th><th>Loại</th><th class="num">Giá</th><th>Miễn phí / điểm nghẽn</th></tr></thead>
+      <tbody>
+        <tr><td>Hevy</td><td>Ghi tạ</td><td class="num">$23,99/năm · $74,99 trọn đời</td><td>Ghi không giới hạn; 4 routine, 7 bài tự tạo, biểu đồ 3 tháng</td></tr>
+        <tr><td>Strong</td><td>Ghi tạ</td><td class="num">$29,99/năm · $99,99 trọn đời</td><td>3 routine</td></tr>
+        <tr><td>JEFIT</td><td>Ghi tạ</td><td class="num">$69,99/năm</td><td>Có quảng cáo; phân tích sâu bị khóa</td></tr>
+        <tr><td>Boostcamp</td><td>Chương trình</td><td class="num">$59,99/năm</td><td>Theo chương trình có sẵn miễn phí; tự tạo nhiều thì trả phí</td></tr>
+        <tr><td>Alpha Progression</td><td>Chương trình</td><td class="num">$79,99/năm</td><td>—</td></tr>
+        <tr><td>Fitbod</td><td>Tự sinh buổi</td><td class="num">$95,99/năm</td><td>3 buổi miễn phí</td></tr>
+        <tr><td>RP Hypertrophy · JuggernautAI</td><td>Thuật toán kiểu HLV</td><td class="num">$299,99 · $349,99/năm</td><td>Không có gói miễn phí</td></tr>
+        <tr><td>MacroFactor</td><td>Dinh dưỡng</td><td class="num">$71,99/năm</td><td>Không có gói miễn phí</td></tr>
+        <tr><td>MyFitnessPal Premium</td><td>Dinh dưỡng</td><td class="num">$79,99/năm</td><td>Quét mã vạch bị khóa từ 08/2022</td></tr>
+        <tr><td>Cronometer Gold</td><td>Dinh dưỡng</td><td class="num">$49,99/năm</td><td>Mã vạch vẫn miễn phí</td></tr>
+        <tr><td>Wao (Việt Nam)</td><td>Dinh dưỡng</td><td class="num">₫79.000/tháng · ₫599.000/năm</td><td>—</td></tr>
+        <tr><td>Caloer (Việt Nam)</td><td>Dinh dưỡng</td><td class="num">$14,99/năm</td><td>—</td></tr>
+      </tbody>
+      <caption>Giá niêm yết US/App Store; một số con số lấy từ trang so sánh của đối thủ.</caption>
+    </table>
+  </div>
+</section>
+
+<section id="khoang-trong">
+  <header><div class="eyebrow">Tổng hợp</div><h2>Ai làm tốt nhất, và còn thiếu gì cho người tập Việt</h2></header>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Nhu cầu</th><th>Làm tốt nhất</th><th>Còn thiếu cho người Việt lười ghi</th></tr></thead>
+      <tbody>
+        <tr><td><b>Ghi tạ + vượt lần trước</b></td><td>Strong, Hevy</td><td>Điền sẵn để 1 chạm; dải rep là trường riêng; tên bài song ngữ; chạy offline</td></tr>
+        <tr><td><b>Nhiều lịch / giai đoạn</b></td><td>Boostcamp, Liftosaur</td><td>Giai đoạn gộp lịch tập + macro + cân; không giới hạn số routine</td></tr>
+        <tr><td><b>Cân hằng ngày</b></td><td>Happy Scale, Libra, MacroFactor</td><td>Trend làm số chính, bằng tiếng Việt; không streak gây áp lực</td></tr>
+        <tr><td><b>Ảnh tiến trình</b></td><td>Progressly, ProgressCam; Hevy</td><td>Bộ 3 tư thế gắn với trend cân; riêng tư mặc định</td></tr>
+        <tr><td><b>Ăn uống món Việt</b></td><td>MacroFactor (cách ghi); Wao, Eatsy (món Việt)</td><td>Bữa kế hoạch → xác nhận 1 chạm; bảng khẩu phần chuẩn có kiểm soát</td></tr>
+        <tr><td><b>Báo cáo</b></td><td>Rời rạc theo từng app</td><td>Thẻ check-in tuần/tháng gộp tất cả</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="de-xuat">
+  <header><div class="eyebrow">Đề xuất</div><h2>Mặc định ở mọi chỗ là "giống lần trước"</h2></header>
+  <p>Người lười ghi không cần thêm tính năng. Họ cần thao tác mặc định là lặp lại: hiệp tập điền sẵn, bữa ăn chép từ kế hoạch, cân nặng một ô số. Sai lệch nhỏ để đường xu hướng hấp thụ. Các app hàng đầu đều có từng mảnh của triết lý này (cột "lần trước" của Hevy, ghi "thiện chí" của MacroFactor, trend của Happy Scale), nhưng chưa ai ráp lại, và chưa ai làm cho người Việt.</p>
+  <div class="split">
+    <div>
+      <span class="tag free">Nên miễn phí</span>
+      <ul>
+        <li>Ghi không giới hạn</li>
+        <li>Không giới hạn số routine và số giai đoạn</li>
+        <li>Lối ghi lặp lại (điền sẵn, chép bữa, xác nhận 1 chạm)</li>
+        <li>Trend cân, ảnh tiến trình cơ bản</li>
+      </ul>
+      <p class="muted" style="font-size:.85rem">Đây đúng là những thứ Strong, Hevy, MyFitnessPal khóa và bị chê nhiều nhất.</p>
+    </div>
+    <div>
+      <span class="tag paid">Có thể thu phí</span>
+      <ul>
+        <li>Gợi ý tăng tạ tự động</li>
+        <li>AI ghi món qua ảnh / chữ</li>
+        <li>Báo cáo dài hạn, thẻ check-in nâng cao</li>
+      </ul>
+      <p class="muted" style="font-size:.85rem">Giá nên neo quanh Wao (₫79.000/tháng, ₫599.000/năm), không theo giá đô la.</p>
+    </div>
+  </div>
+</section>
+
+<section id="han-che">
+  <header><div class="eyebrow">Hạn chế của nghiên cứu</div><h2>Những điểm cần kiểm chứng trước khi chốt thiết kế</h2></header>
+  <ul style="margin:0;padding-left:1.2em;display:grid;gap:6px;max-width:68ch">
+    <li>Không truy cập được Reddit và các nhóm Facebook Việt: ý kiến người dùng lấy qua trang tổng hợp và đánh giá trên store.</li>
+    <li>Nhiều trang so sánh (sensai, gainframe, nutrola, Boostcamp "vs"…) do chính đối thủ viết; chỉ dùng cho dữ kiện giá và tính năng.</li>
+    <li>Chưa xác minh: cách các app xử lý khi mất mạng; cách Boostcamp/Liftosaur xử lý buổi bị lỡ; giá VND trên store Việt Nam.</li>
+    <li>Chưa có cảm nhận thực của người tập Việt. Nên phỏng vấn 5–10 người tập trước khi chốt.</li>
+  </ul>
+</section>
+
+<section id="nguon">
+  <header><div class="eyebrow">Nguồn chính</div></header>
+  <ol class="sources">
+    <li><a href="https://help.hevyapp.com/hc/en-us/articles/38387296276375-Update-Routine-vs-Keep-Original-Routine" target="_blank" rel="noopener">Hevy Help: Update Routine vs Keep Original</a></li>
+    <li><a href="https://www.hevyapp.com/features/progress-photos/" target="_blank" rel="noopener">Hevy: Progress photos</a></li>
+    <li><a href="https://apps.apple.com/us/app/strong-workout-tracker-gym-log/id464254577" target="_blank" rel="noopener">Strong trên App Store</a></li>
+    <li><a href="https://www.liftosaur.com/docs/liftoscript" target="_blank" rel="noopener">Liftosaur: Liftoscript docs</a></li>
+    <li><a href="https://help.fitbod.me/hc/en-us/articles/360004429814-How-Fitbod-Creates-Your-Workout" target="_blank" rel="noopener">Fitbod: How Fitbod creates your workout</a></li>
+    <li><a href="https://help.macrofactorapp.com/en/articles/381-how-does-macrofactor-workouts-integrate-with-macrofactor-nutrition" target="_blank" rel="noopener">MacroFactor: Workouts × Nutrition</a></li>
+    <li><a href="https://help.macrofactorapp.com/en/articles/201-how-accurately-do-i-need-to-log-my-food" target="_blank" rel="noopener">MacroFactor: Cần ghi chính xác tới đâu</a></li>
+    <li><a href="https://macrofactor.com/timeline-based-food-logger/" target="_blank" rel="noopener">MacroFactor: Timeline food logger</a></li>
+    <li><a href="https://fourmilab.ch/hackdiet/www/subsubsection1_4_1_0_8_3.html" target="_blank" rel="noopener">The Hacker's Diet: trend line</a></li>
+    <li><a href="https://apps.apple.com/us/app/happy-scale/id532430574" target="_blank" rel="noopener">Happy Scale trên App Store</a></li>
+    <li><a href="https://wao.vn/" target="_blank" rel="noopener">Wao</a></li>
+    <li><a href="https://ajad.searca.org/article?p=5270" target="_blank" rel="noopener">AJAD/SEARCA: cơ sở dữ liệu thành phần nông sản Việt Nam</a></li>
+    <li><a href="https://news.slashdot.org/story/22/08/25/1955238/myfitnesspal-paywalls-barcode-scanner-that-made-counting-calories-easy" target="_blank" rel="noopener">MyFitnessPal khóa quét mã vạch (2022)</a></li>
+    <li><a href="https://www.sensai.fit/blog/hevy-vs-strong-vs-fitbod-vs-jefit" target="_blank" rel="noopener">sensai: Hevy vs Strong vs Fitbod vs JEFIT</a> (trang của đối thủ)</li>
+  </ol>
+  <p class="muted" style="font-size:.85rem">Danh sách đầy đủ có trong <code>reports/App theo dõi tập gym cá nhân.md</code> và các ghi chú ở <code>research_notes/</code>.</p>
+</section>
+
+<footer>eCoach · Nghiên cứu nội bộ, 16/10/2026. Giá và tính năng có thể đã thay đổi sau ngày khảo sát.</footer>
+
+</div>
+
+<script>
+(function () {
+  var svg = document.getElementById('weight-chart');
+  if (!svg) return;
+  var NS = 'http://www.w3.org/2000/svg';
+  // Dữ liệu minh họa: đợt siết 28 ngày, giảm ~0,1 kg/ngày, dao động nước ±0,8 kg
+  var noise = [0.4,-0.3,0.7,0.1,-0.5,0.8,-0.2,0.3,-0.6,0.5,0.0,-0.4,0.6,-0.1,0.2,-0.7,0.4,0.1,-0.3,0.7,-0.5,0.2,-0.2,0.5,-0.6,0.3,0.0,-0.3];
+  var raw = noise.map(function (n, i) { return Math.round((72.0 - 0.1 * i + n) * 10) / 10; });
+  var trend = [];
+  raw.forEach(function (m, i) { trend.push(i === 0 ? m : trend[i - 1] + 0.1 * (m - trend[i - 1])); });
+
+  var W = 640, H = 240, L = 48, R = 16, T = 14, B = 34;
+  var all = raw.concat(trend);
+  var yMin = Math.floor(Math.min.apply(null, all)), yMax = Math.ceil(Math.max.apply(null, all));
+  var x = function (i) { return L + (i / (raw.length - 1)) * (W - L - R); };
+  var y = function (v) { return T + (1 - (v - yMin) / (yMax - yMin)) * (H - T - B); };
+  function el(name, attrs, text) {
+    var e = document.createElementNS(NS, name);
+    for (var k in attrs) { if (k === "fill" || k === "stroke") e.style[k] = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    if (text != null) e.textContent = text;
+    svg.appendChild(e); return e;
+  }
+  for (var v = yMin; v <= yMax; v += 1) {
+    el('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'var(--line)', 'stroke-width': 1 });
+    el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: 'var(--muted)', 'font-family': 'JetBrains Mono, monospace' }, v + ' kg');
+  }
+  [0, 7, 14, 21, 27].forEach(function (i) {
+    el('text', { x: x(i), y: H - 12, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--muted)', 'font-family': 'Be Vietnam Pro, sans-serif' }, 'Ngày ' + (i + 1));
+  });
+  raw.forEach(function (m, i) { el('circle', { cx: x(i), cy: y(m), r: 3, fill: 'var(--muted)', 'fill-opacity': 0.55 }); });
+  var d = trend.map(function (t, i) { return (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(t).toFixed(1); }).join(' ');
+  el('path', { d: d, fill: 'none', stroke: 'var(--navy)', 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' });
+  var last = trend.length - 1;
+  el('circle', { cx: x(last), cy: y(trend[last]), r: 5, fill: 'var(--navy)' });
+  el('text', { x: x(last) - 8, y: y(trend[last]) - 10, 'text-anchor': 'end', 'font-size': 12, 'font-weight': 600, fill: 'var(--navy)', 'font-family': 'JetBrains Mono, monospace' }, trend[last].toFixed(1) + ' kg');
+})();
+</script>
+</body>
+</html>
